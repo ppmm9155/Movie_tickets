@@ -1,5 +1,5 @@
 
-public class movieMain {
+public class MovieMain {
 
 	public static void main(String[] args) {
 		
