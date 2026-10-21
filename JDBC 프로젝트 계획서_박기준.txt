@@ -1,0 +1,233 @@
+영화 좌석 예매 프로그램
+
+----------------
+영화 1~3개로 , 좌석수 5행 5열 25 , 예매인원 1명으로 고정? 할필요없는듯
+
+영화의 좌석수는 25개 그안은 좌석이 찼다 , 좌석이 없다 로 구분
+SQL boolean이 없다
+
+영화의 좌석이 25개 -> 좌석테이블 필요 -> 5개의 열 A B C D E , 5개의 행 1 , 2 , 3 , 4 ,5 , -> 레코드는? 1 , 0 ?
+기본을 0 으로
+
+예매여부로 0 , 1 로 좌석 찼는지 안찼는지 -> 25개의 레코드 A1 A2 A3 ... E5 필요
+
+좌석테이블에서 영화 ID를 참조 해야하는지 혹은
+기본값으로 영화 ID 1 로 고정하고 -> 영화 선택후 -> update 로 영화 ID를 선택한 영화로 변경한다
+
+------------------------------------------------
+영화예매 프로그램
+영화를 예매를 할려면 영화정보가 있어야하고
+좌석 정보가 필요하고
+좌석 정보에서 <- 이미 예매한 좌석 있을 가능성 어떻게 판단할건지 <- 예매티켓 에 좌석정보와 예매 여부가 있다 
+<- 그럼 예매티켓에서의 예매 여부는 무조건 1인가?
+
+영화정보 , 예매 티켓 , 좌석 정보 
+예매를 할려면 -> 영화정보와 좌석 정보가 필요해 
+
+좌석정보는 예매한 좌석을 알려면 -> 예매티켓의 예매 여부를 알아야해
+
+예매를 하면 A , 1 이 들어옴 이걸 문자열로 치환 -> A열 1행 하는것보다
+
+티켓과 예매의 행 열을 동일선상에 놓고 그럼 서로 참조인가?
+둘다 필요로 하는거같은데 예매를 할려면 좌석정보가 즉 행, 열 정보가 필요하고 
+좌석도 티켓의 예매여부를 알아야 좌석에서의 예매가 됬는지 안됬는지 알수있다
+
+누구를 부모로 둬야하지
+좌석은 영화관에서 고정이고 티켓은 뽑는거니까 
+
+좌석을 부모로 하고 
+
+primary key 하나의 테이블에 중복해서 사용못함
+-> 복합 기본키로 사용해야한다고함 -> 복합 기본키 쓰지말고 unique로 쓰자 
+
+예매 인원 1명으로 고정
+
+
+-----------------------------------------------
+일단 상영관 한개로
+
+좌석 레코드 25개
+영화 3개
+예매 인원 1명
+
+예매 안된 좌석은 □ 걸로, 예매된 좌석은 ■ 로 좌석띄움
+-----------------------------------------------
+매 실행마다 상영관의 영화시작시간을 다르게 하려고함 -> 중복되지않게
+프로그램 실행 -> rand() 써서 영화 레코드 추가 -> 영화의 상영시작시간과,상영시간 서로 중복안되게
+어려우면 하지않기
+
+
+
+------------------------------------------------
+
+테이블 
+
+영화 정보 테이블 (부모)
+
+영화 ID : number  primary key 
+관번호 :  number not null
+영화 제목: varchar2(36)  not null  
+영화 상영 시작 시간: date not null (오늘날짜 기준) 
+영화 상영 시간: number not null  (분단위)
+----------------
+예매 정보 테이블 (자식)
+예매 ID : number , primary key
+영화 ID : number , not null foreign key (영화 정보 테이블)
+좌석 ID : number not null foreign key (좌석 정보 테이블)
+예매인원: number , default 1 check 1 not null
+복합 unique 영화ID + 좌석 ID
+----------------
+좌석 테이블 (부모)
+좌석 ID : number parimary key
+관번호: number not null
+좌석 행: varchar(3) not null 
+좌석 열: number  not null
+복합 unique 관번호+좌석행 + 좌석열
+----------------
+메뉴
+
+전체 영화 정보 조회
+
+영화 상세정보 조회 -> 영화이름으로 조회
+
+영화 좌석표 조회
+
+영화별 남은 좌석 수 조회
+
+영화 예매 
+영화예매 -> 전체영화 조회 -> 하나의 영화 선택 -> 좌석표 띄움 -> 예매창 나옴 -> 예매 함 -> 해당 영화좌석참
+( 전체좌석수 -1)
+
+예매 티켓 취소 
+예매취소 -> 해당 예매정보 테이블 없어짐 -> 해당 영화에서의 좌석 예매 여부 0 으로  
+
+예매한 티켓 전체 조회
+
+예매한 티켓 하나 조회 (티켓ID)
+
+현재 상영하는 영화 조회 (현재 시간 기준으로?)
+
+많이 예매한 영화 조회(인기있는?)
+
+오전 영화 조회 
+
+오후 영화 조회
+
+
+----------
+--테이블
+
+---영화-------------------------
+
+drop table movies cascade constraints;
+
+create table movies(
+	movie_id number primary key ,
+	screen_id number not null , 
+	title varchar2(36) not null , 
+	movie_start date not null ,
+	movie_time number not null 
+);
+
+-- 좌석 정보 --------------------
+
+drop table seat_info cascade constraints;
+
+create table seat_info (
+    seat_id number primary key ,
+    screen_id number not null,
+    seat_row varchar2(3) not null ,
+    seat_col number not null ,
+	unique (screen_id, seat_row, seat_col)
+);
+
+
+--- 예매 정보 --------------------
+
+drop table ticket ; 
+
+create table ticket (
+    ticket_id number primary key ,
+    movie_id number not null references movies(movie_id),
+    seat_id number not null references seat_info(seat_id),
+    ticket_num number default 1 not null check (ticket_num = 1),
+	unique (movie_id, seat_id)
+);
+
+-- 시퀀스 ----------------------
+
+drop sequence movie_seq;
+create sequence movie_seq
+	increment by 1
+	start with 1 
+	minvalue 1
+	maxvalue 10000
+	nocache;
+
+
+drop sequence ticket_seq;
+create sequence ticket_seq
+	increment by 1
+	start with 1 
+	minvalue 1
+	maxvalue 10000
+	nocache;
+
+drop sequence seat_seq;
+create sequence seat_seq
+	increment by 1
+	start with 1 
+	minvalue 1
+	maxvalue 250
+	nocache;
+
+----영화 정보 데이터 입력----------------------------
+
+
+-- 현재날짜와 상영시작 시간 을 가져오고싶은데
+to_date(to_char(sysdate , 'yyyy-mm-dd')|| '10:25' , 'yyyy-mm-dd hh24:mi' )  
+
+insert into movies values(movie_seq.nextval , 1 , '치이카와 인어섬' , 
+to_date(to_char(sysdate , 'yyyy-mm-dd')|| '10:25' , 'yyyy-mm-dd hh24:mi' ), 120 );
+
+insert into movies values(movie_seq.nextval , 1 , '스파이더맨' , 
+to_date(to_char(sysdate , 'yyyy-mm-dd')|| '15:00' , 'yyyy-mm-dd hh24:mi' ) , 150 );
+
+insert into movies values(movie_seq.nextval , 1 , '암살자들' , 
+to_date(to_char(sysdate , 'yyyy-mm-dd')|| '20:15' , 'yyyy-mm-dd hh24:mi' ) , 130);
+
+-----좌석 정보 데이터 입력-------------------------
+
+insert into seat_info values(seat_seq.nextval , 1 , 'A' , 1 );
+insert into seat_info values(seat_seq.nextval , 1 , 'A' , 2 );
+insert into seat_info values(seat_seq.nextval , 1 , 'A' , 3 );
+insert into seat_info values(seat_seq.nextval , 1 , 'A' , 4 );
+insert into seat_info values(seat_seq.nextval , 1 , 'A' , 5 );
+
+insert into seat_info values(seat_seq.nextval , 1 , 'B' , 1 );
+insert into seat_info values(seat_seq.nextval , 1 , 'B' , 2 );
+insert into seat_info values(seat_seq.nextval , 1 , 'B' , 3 );
+insert into seat_info values(seat_seq.nextval , 1 , 'B' , 4 );
+insert into seat_info values(seat_seq.nextval , 1 , 'B' , 5 );
+
+insert into seat_info values(seat_seq.nextval , 1 , 'C' , 1 );
+insert into seat_info values(seat_seq.nextval , 1 , 'C' , 2 );
+insert into seat_info values(seat_seq.nextval , 1 , 'C' , 3 );
+insert into seat_info values(seat_seq.nextval , 1 , 'C' , 4 );
+insert into seat_info values(seat_seq.nextval , 1 , 'C' , 5 );
+
+insert into seat_info values(seat_seq.nextval , 1 , 'D' , 1 );
+insert into seat_info values(seat_seq.nextval , 1 , 'D' , 2 );
+insert into seat_info values(seat_seq.nextval , 1 , 'D' , 3 );
+insert into seat_info values(seat_seq.nextval , 1 , 'D' , 4 );
+insert into seat_info values(seat_seq.nextval , 1 , 'D' , 5 );
+
+insert into seat_info values(seat_seq.nextval , 1 , 'E' , 1 );
+insert into seat_info values(seat_seq.nextval , 1 , 'E' , 2 );
+insert into seat_info values(seat_seq.nextval , 1 , 'E' , 3 );
+insert into seat_info values(seat_seq.nextval , 1 , 'E' , 4 );
+insert into seat_info values(seat_seq.nextval , 1 , 'E' , 5 );
+
+commit;
+
+
