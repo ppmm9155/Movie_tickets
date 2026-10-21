@@ -31,9 +31,17 @@ public class Movies_Dao extends DBConnection{
 	        
 	        rs = pstmt.executeQuery();
 	        
-			while(rs.next()) {
-				
-			}
+	        System.out.println("전체 조회 테스트");
+	        while (rs.next()) {
+	        	
+	            System.out.println(
+	                rs.getInt("movie_id") + " | " +
+	                rs.getString("screen_id") + " | " +
+	                rs.getString("title") + " | " +
+	                rs.getTimestamp("movie_start") + " | " +
+	                rs.getInt("movie_time") + "분"
+	            );
+	        }
 			
 		} catch (SQLException e) {
 			e.printStackTrace();

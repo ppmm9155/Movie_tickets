@@ -12,7 +12,7 @@ public class MovieMain {
 	public static void main(String[] args) {
 		MovieMain mm = new MovieMain();
 		
-		
+		mdao.movieSelectAll();
 	}
 
 }
