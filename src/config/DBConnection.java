@@ -23,7 +23,7 @@ public class DBConnection {
 				this.pw = prop.getProperty("db.pw");
 
 			} else {
-				System.err.println("db.propertiesr 파일없음");
+				System.err.println("db.properties 파일없음");
 			}
 		} catch (Exception e) {
 			System.err.println("파일 읽기 실패");
@@ -39,16 +39,11 @@ public class DBConnection {
 
 	}
 
-	Connection conn = null;
 
-	public void getConniction() {
-		try {
-			System.out.println("계정 접속");
-			conn = DriverManager.getConnection(url, id, pw);
 
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+	public Connection getConniction() throws SQLException {
+		return DriverManager.getConnection(url, id, pw);
 	}
+		
 
 }

@@ -7,6 +7,8 @@ public class MovieMain {
 	static Seat_Info_Dao sdao = new Seat_Info_Dao();
 	static Ticket_Dao tdao = new Ticket_Dao();
 	
+	
+	
 	public static void main(String[] args) {
 		MovieMain mm = new MovieMain();
 		
