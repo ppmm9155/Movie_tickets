@@ -1,10 +1,12 @@
 package bean;
 
+import java.sql.Timestamp;
+
 public class Movies_Bean {
 	private int movie_id;
 	private int screen_id;
 	private String title;
-	private String movie_start;
+	private Timestamp movie_start;
 	private int movie_time;
 	
 	//getter setter
@@ -26,10 +28,10 @@ public class Movies_Bean {
 	public void setTitle(String title) {
 		this.title = title;
 	}
-	public String getMovie_start() {
+	public Timestamp getMovie_start() {
 		return movie_start;
 	}
-	public void setMovie_start(String movie_start) {
+	public void setMovie_start(Timestamp movie_start) {
 		this.movie_start = movie_start;
 	}
 	public int getMovie_time() {

@@ -1,5 +1,11 @@
 package dao;
 
-public class Ticket_Dao {
+import config.DBConnection;
+
+public class Ticket_Dao extends DBConnection{
 	
+	public Ticket_Dao() {
+		super();
+	}
+
 }
