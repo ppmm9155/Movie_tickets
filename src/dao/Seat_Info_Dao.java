@@ -1,11 +1,11 @@
 package dao;
 
-public class Seat_Info_Dao {
-	String driver = "oracle.jdbc.driver.OracleDriver";
-	String url = "jdbc:oracle:thin:@localhost:1521:xe";
+import config.DBConnection;
+
+public class Seat_Info_Dao extends DBConnection{
 	
-	String id = "sqlid";
-	String pw = "1234";
-	
+	public Seat_Info_Dao() {
+		super();
+	}
 	
 }

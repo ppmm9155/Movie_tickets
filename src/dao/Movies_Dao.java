@@ -1,6 +1,15 @@
 package dao;
 
-public class Movies_Dao {
-	String driver = "oracle.jdbc.driver.OracleDriver";
-	String url = "jdbc:oracle:thin:@localhost:1521:xe";
+import config.DBConnection;
+
+public class Movies_Dao extends DBConnection{
+	
+	public Movies_Dao() {
+		super();
+	}
+	
+	
+	
+	
+	
 }
