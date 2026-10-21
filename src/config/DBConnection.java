@@ -9,7 +9,7 @@ import java.util.Properties;
 
 public class DBConnection {
 	String driver = "oracle.jdbc.driver.OracleDriver";
-	String url = "jdbc:oracle:thin:@localhost:1521:xe";
+	String url = "";
 
 	String id = "";
 	String pw = "";
@@ -21,6 +21,7 @@ public class DBConnection {
 				prop.load(input);
 				this.id = prop.getProperty("db.id");
 				this.pw = prop.getProperty("db.pw");
+				this.url = prop.getProperty("db.url");
 
 			} else {
 				System.err.println("db.properties 파일없음");
