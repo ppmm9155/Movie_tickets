@@ -1,5 +1,7 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
+import bean.Movies_Bean;
 import dao.Movies_Dao;
 import dao.Seat_Info_Dao;
 import dao.Ticket_Dao;
@@ -19,6 +21,10 @@ public class MovieMain {
 		while(true) {
 			
 			System.out.println("1. 전체 영화 조회");
+			System.out.println("2. 영화 상세정보 조회");
+			
+			System.out.println("7. 예매티켓 전체 조회");
+			
 			System.out.println("13. 프로그램 종료");
 			
 			
@@ -37,10 +43,12 @@ public class MovieMain {
 			
 			switch(menu) {
 			case 1:
-				mdao.movieSelectAll();
+//				ArrayList<Movies_Bean> lists = new ArrayList<Movies_Bean>();
+				ArrayList<Movies_Bean> Alllists = mdao.movieSelectAll();
+				
 				break;
 			case 2:
-				
+				ArrayList<Movies_Bean> Searchlists = mdao.searchMovie();
 				break;
 			case 3:
 				
@@ -55,7 +63,7 @@ public class MovieMain {
 				
 				break;
 			case 7:
-				
+				tdao.ticketSelectAll();
 				break;
 			case 8:
 				
