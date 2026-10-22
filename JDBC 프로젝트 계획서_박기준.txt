@@ -279,6 +279,9 @@ join movies m on k.movie_id = m.movie_id
 join seat_info s on k.seat_id = s.seat_id 
 group by m.movie_id,m.screen_id,m.title,m.movie_start,m.movie_time;
 
-
+--오전 영화 조건
+select * from movies where movie_start between 
+to_date(to_char('2026-10-21')|| '00:00' , 'yyyy-mm-dd hh24:mi' )  and 
+to_date(to_char('2026-10-21')|| '12:00' , 'yyyy-mm-dd hh24:mi' ) ; 
 
 

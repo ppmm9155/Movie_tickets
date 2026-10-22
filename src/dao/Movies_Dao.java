@@ -129,6 +129,53 @@ public class Movies_Dao extends DBConnection{
 		return lists;
 		
 	}
+
+	public ArrayList<Movies_Bean> amSelectMovie() {
+		
+		Connection conn= null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		// 레코드 입력된게 어제 날짜인 2026-10-21임
+		String sql = "select * from movies where movie_start between "
+				+ "to_date(to_char('2026-10-21')|| '00:00' , 'yyyy-mm-dd hh24:mi' )  and "
+				+ "to_date(to_char('2026-10-21')|| '12:00' , 'yyyy-mm-dd hh24:mi' ) ";
+		
+		ArrayList<Movies_Bean> lists = new ArrayList<Movies_Bean>();
+		
+		try {
+			conn=getConniction();
+			pstmt = conn.prepareStatement(sql);
+			rs = pstmt.executeQuery();
+			
+			while(rs.next()) {
+				Movies_Bean mb = new Movies_Bean();
+	        	
+	        	mb.setMovie_id(rs.getInt("movie_id"));
+	        	mb.setScreen_id(rs.getInt("screen_id"));
+	        	mb.setTitle(rs.getString("title"));
+	        	mb.setMovie_start(rs.getTimestamp("movie_start"));
+	        	mb.setMovie_time(rs.getInt("movie_time"));
+	        	
+	        	lists.add(mb);
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}finally {
+			try {
+				if(rs != null)
+					rs.close();
+				if(pstmt != null)
+					pstmt.close();
+				if(conn != null)
+					conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return lists;
+	}
 	
 //	
 	

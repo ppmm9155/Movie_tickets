@@ -3,7 +3,6 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 
 import bean.Movies_Bean;
-import bean.Seat_Info_Bean;
 import bean.Ticket_Bean;
 import dao.Movies_Dao;
 import dao.Seat_Info_Dao;
@@ -97,6 +96,7 @@ public class MovieMain {
 				
 				break;
 			case 10:
+				amSelectMovie();
 				
 				break;
 			case 11:
@@ -113,6 +113,16 @@ public class MovieMain {
 		}
 	}
 	
+	private void amSelectMovie() {
+		ArrayList<Movies_Bean> amlists = mdao.amSelectMovie();
+		
+		if(amlists.size()>0) {
+			showMovies(amlists);
+		}else {
+			System.out.println("오전에 상영중인 영화가 없습니다.");
+		}
+	}
+
 	private void deleteTicket() {
 		
 		int delete = 0;
