@@ -26,6 +26,7 @@ public class MovieMain {
 			
 			
 			System.out.println("7. 예매티켓 전체 조회");
+			System.out.println("8. 예매한 티켓 검색");
 			
 			System.out.println("13. 프로그램 종료");
 			
@@ -82,6 +83,7 @@ public class MovieMain {
 				
 				break;
 			case 8:
+				searchTicket();
 				
 				break;
 			case 9:
@@ -107,6 +109,41 @@ public class MovieMain {
 		}
 	}
 	
+	private void searchTicket() {
+		java.time.format.DateTimeFormatter timeFormatter = java.time.format.DateTimeFormatter.ofPattern("HH시mm분");
+		
+		int ticketId = 0;
+		
+		while(true) {
+			System.out.print("에매 번호를 입력하시오 ");
+			try {
+				ticketId = sc.nextInt();
+				break;
+			}catch(java.util.InputMismatchException e) {
+				System.out.println("번호를 입력하시오.");
+				sc.next();
+			}
+		}
+		
+		Ticket_Bean tb = tdao.searchTicket(ticketId);
+		
+		if(tb != null) {
+			System.out.println("-------------------------------------");
+			System.out.println(
+					"영화 제목: "+tb.getMb().getTitle()+"\n"+
+					"상영 시작 시간: "+tb.getMb().getMovie_start().toLocalDateTime().format(timeFormatter)+"\n"+
+					"상영 시간: "+tb.getMb().getMovie_time()+"분 "+"\n"+
+					"상영관: "+tb.getMb().getScreen_id()+"관 "+"\n"+
+					"관람 좌석: "+tb.getSb().getSeat_row()+"행"+tb.getSb().getSeat_col()+"열 "+"\n"+
+					"예매 번호: "+tb.getTicket_id()+"\n"+
+					"관람 인원: "+tb.getTicket_num()
+						);
+			System.out.println("-------------------------------------");
+		}else {
+			System.out.println("조건에 맞는 예매정보가 없습니다.\n");
+		}
+	}
+
 	private void showTicket(ArrayList<Ticket_Bean> Tlists) {
 		System.out.println("-------------------------------------");
 		java.time.format.DateTimeFormatter timeFormatter = java.time.format.DateTimeFormatter.ofPattern("HH시mm분");
