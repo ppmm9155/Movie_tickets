@@ -80,7 +80,8 @@ public class MovieMain {
 				
 				break;
 			case 6:
-				
+				//예매 티켓 삭제
+				deleteTicket();
 				break;
 			case 7:
 				//예매 티켓 전체 조회
@@ -112,6 +113,29 @@ public class MovieMain {
 		}
 	}
 	
+	private void deleteTicket() {
+		
+		int delete = 0;
+		while(true) {
+			System.out.print("삭제할 티켓 번호를 입력하세요 ");
+			try {
+				delete = sc.nextInt();
+				break;
+			}catch (Exception e) {
+				System.out.println("옳바른 티켓 번호를 입력하세요");
+				sc.next();
+			}
+		}
+		
+		int cnt = tdao.deleteTicket(delete);
+		
+		if(cnt == 1) {
+			System.out.println("예매 취소 했습니다.");
+		}else {
+			System.out.println("에매 취소를 실패했습니다.");
+		}
+	}
+
 	//영화별 남은 좌석수 조회
 	private void emptySeats() {
 //		전체좌석수 count(*) , 
