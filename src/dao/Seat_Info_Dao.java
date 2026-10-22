@@ -8,4 +8,6 @@ public class Seat_Info_Dao extends DBConnection{
 		super();
 	}
 	
+	
+	
 }

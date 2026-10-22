@@ -230,4 +230,33 @@ insert into seat_info values(seat_seq.nextval , 1 , 'E' , 5 );
 
 commit;
 
+-----영화 예매 티켓 데이터 입력 --------------------------------
+
+-- 1관 C행3열 치이카와 
+insert into ticket values(ticket_seq.nextval , 1 , 13 , default );
+
+-- 1관 C행3열 스파이더맨
+
+insert into ticket values(ticket_seq.nextval , 2 , 13 , default ); 
+
+-- 1관 C행3열 암살자들
+
+insert into ticket values(ticket_seq.nextval , 3 , 13 , default ); 
+
+--------JDBC에 쓰일 sql문 작성------------------------
+
+--전체 에매 정보 조회 할때 SQL 문
+
+select 
+k.ticket_id , k.ticket_num ,
+m.movie_id , m.screen_id, m.title ,m.movie_start , m.movie_time , 
+s.seat_id , s.seat_row , s.seat_col , s.screen_id  
+from ticket k
+join movies m on k.movie_id = m.movie_id
+join seat_info s on k.seat_id = s.seat_id ; 
+
+
+
+
+
 
