@@ -296,4 +296,36 @@ public class Ticket_Dao extends DBConnection{
 		
 	}
 
+	public int deleteTicket(int delete) {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		
+		String sql = "delete from ticket where ticket_id = ? ";
+		
+		int cnt = 0;
+		
+		try {
+			conn = getConniction();
+			
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, delete);
+			
+			cnt = pstmt.executeUpdate();
+			
+		} catch (SQLException e) {
+			System.out.println("오류가 발생했습니다");
+		}finally {
+			try {
+				if(pstmt != null)
+					pstmt.close();
+				if(conn != null)
+					conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return cnt;
+	}
+
 }
