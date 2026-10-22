@@ -2,6 +2,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 import bean.Movies_Bean;
+import bean.Ticket_Bean;
 import dao.Movies_Dao;
 import dao.Seat_Info_Dao;
 import dao.Ticket_Dao;
@@ -20,8 +21,9 @@ public class MovieMain {
 	private void init() {
 		while(true) {
 			
-			System.out.println("1. 전체 영화 조회");
-			System.out.println("2. 영화 상세정보 조회");
+			System.out.println("1. 상영중인 전체 영화 조회");
+			System.out.println("2. 상영중인 영화 검색");
+			
 			
 			System.out.println("7. 예매티켓 전체 조회");
 			
@@ -43,12 +45,19 @@ public class MovieMain {
 			
 			switch(menu) {
 			case 1:
-//				ArrayList<Movies_Bean> lists = new ArrayList<Movies_Bean>();
+				//상영중인 전체 영화 조회
 				ArrayList<Movies_Bean> Alllists = mdao.movieSelectAll();
+				if(Alllists.size() > 0) {
+					showMovies(Alllists);
+				}else {
+					System.out.println("상영중인 영화가 없습니다.");
+				}
 				
 				break;
 			case 2:
-				ArrayList<Movies_Bean> Searchlists = mdao.searchMovie();
+				// 상영중인 영화검색
+				searchMovie();
+				
 				break;
 			case 3:
 				
@@ -63,7 +72,14 @@ public class MovieMain {
 				
 				break;
 			case 7:
-				tdao.ticketSelectAll();
+				ArrayList<Ticket_Bean> Tlists = tdao.ticketSelectAll();
+				if(Tlists.size() > 0 ) {
+					showTicket(Tlists);
+				}else {
+					System.out.println("예매 정보가 없습니다");
+				}
+				
+				
 				break;
 			case 8:
 				
@@ -89,6 +105,55 @@ public class MovieMain {
 			}
 			
 		}
+	}
+	
+	private void showTicket(ArrayList<Ticket_Bean> Tlists) {
+		System.out.println("-------------------------------------");
+		java.time.format.DateTimeFormatter timeFormatter = java.time.format.DateTimeFormatter.ofPattern("HH시mm분");
+		for(Ticket_Bean x : Tlists) {
+			System.out.println(
+				"영화 제목: "+x.getMb().getTitle()+"\n"+
+				"상영 시작 시간: "+x.getMb().getMovie_start().toLocalDateTime().format(timeFormatter)+"\n"+
+				"상영 시간: "+x.getMb().getMovie_time()+"분 "+"\n"+
+				"상영관: "+x.getMb().getScreen_id()+"관 "+"\n"+
+				"관람 좌석: "+x.getSb().getSeat_row()+"행"+x.getSb().getSeat_col()+"열 "+"\n"+
+				"예매 번호: "+x.getTicket_id()+"\n"+
+				"관람 인원: "+x.getTicket_num()
+					);
+			System.out.println("-------------------------------------");
+		}
+		
+		
+	}
+
+	private void searchMovie() {
+		System.out.print("영화 검색: ");
+		String search = sc.next();
+		
+		ArrayList<Movies_Bean> Searchlists = mdao.searchMovie(search);
+		
+		if(Searchlists.size()>0) {
+			showMovies(Searchlists);
+		}else {
+			System.out.println("조건에 맞는 영화가 없습니다.\n");
+		}
+		
+		
+	}
+
+	//영화 전체조회출력
+	private void showMovies(ArrayList<Movies_Bean> alllists) {
+		System.out.println("-------------------------------------");
+		System.out.println("상영관\t영화제목\t\t시작시간\t상영시간");
+		java.time.format.DateTimeFormatter timeFormatter = java.time.format.DateTimeFormatter.ofPattern("HH시mm분");
+		for(Movies_Bean x : alllists) {
+			System.out.println(
+					x.getScreen_id()+"\t"+
+					x.getTitle() + (x.getTitle().equals("치이카와 인어섬") ? "\t" : "\t\t") +
+					x.getMovie_start().toLocalDateTime().format(timeFormatter) + "\t "+
+					x.getMovie_time()+"분");
+		}
+		System.out.println("-------------------------------------");
 	}
 
 	public static void main(String[] args) {

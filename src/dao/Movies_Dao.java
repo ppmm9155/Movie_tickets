@@ -77,15 +77,13 @@ public class Movies_Dao extends DBConnection{
 	}
 	
 	//영화 상세 정보 조회
-	public ArrayList<Movies_Bean> searchMovie() {
+	public ArrayList<Movies_Bean> searchMovie(String search) {
 		
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		
 		ArrayList<Movies_Bean> lists = new ArrayList<Movies_Bean>();
-		
-		String search = null; // Main 에서 매개인자로 search 로 받아야함 지금은 에러떄문에 선언만
 		
 		try {
 			conn = getConniction();
