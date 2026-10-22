@@ -270,7 +270,14 @@ from ticket k
 join movies m on k.movie_id = m.movie_id
 join seat_info s on k.seat_id = s.seat_id ; 
 
+--남은 좌석수 계산용
 
+select 
+m.movie_id , m.screen_id, m.title ,m.movie_start , m.movie_time , count(s.seat_id) as count 
+from ticket k
+join movies m on k.movie_id = m.movie_id
+join seat_info s on k.seat_id = s.seat_id 
+group by m.movie_id,m.screen_id,m.title,m.movie_start,m.movie_time;
 
 
 
