@@ -16,7 +16,6 @@ public class Movies_Dao extends DBConnection{
 	}
 	
 	//전체영화 조회
-
 	public ArrayList<Movies_Bean> movieSelectAll() {
 		
 		String sql = "select * from movies order by movie_id asc";
@@ -35,16 +34,7 @@ public class Movies_Dao extends DBConnection{
 	        
 	        rs = pstmt.executeQuery();
 	        
-//	        System.out.println("전체 조회 테스트");
 	        while (rs.next()) {
-	        	
-//	            System.out.println(
-//	                rs.getInt("movie_id") + " | " +
-//	                rs.getString("screen_id") + " | " +
-//	                rs.getString("title") + " | " +
-//	                rs.getTimestamp("movie_start") + " | " +
-//	                rs.getInt("movie_time") + "분"
-//	            );
 	        	
 	        	Movies_Bean mb = new Movies_Bean();
 	        	
@@ -129,7 +119,8 @@ public class Movies_Dao extends DBConnection{
 		return lists;
 		
 	}
-
+	
+	//오전 영화 조회
 	public ArrayList<Movies_Bean> amSelectMovie() {
 		
 		Connection conn= null;
@@ -138,13 +129,63 @@ public class Movies_Dao extends DBConnection{
 		// 레코드 입력된게 어제 날짜인 2026-10-21임
 		String sql = "select * from movies where movie_start between "
 				+ "to_date(to_char('2026-10-21')|| '00:00' , 'yyyy-mm-dd hh24:mi' )  and "
-				+ "to_date(to_char('2026-10-21')|| '12:00' , 'yyyy-mm-dd hh24:mi' ) ";
+				+ "to_date(to_char('2026-10-21')|| '11:59' , 'yyyy-mm-dd hh24:mi' ) ";
 		
 		ArrayList<Movies_Bean> lists = new ArrayList<Movies_Bean>();
 		
 		try {
 			conn=getConniction();
 			pstmt = conn.prepareStatement(sql);
+			rs = pstmt.executeQuery();
+			
+			while(rs.next()) {
+				Movies_Bean mb = new Movies_Bean();
+	        	
+	        	mb.setMovie_id(rs.getInt("movie_id"));
+	        	mb.setScreen_id(rs.getInt("screen_id"));
+	        	mb.setTitle(rs.getString("title"));
+	        	mb.setMovie_start(rs.getTimestamp("movie_start"));
+	        	mb.setMovie_time(rs.getInt("movie_time"));
+	        	
+	        	lists.add(mb);
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}finally {
+			try {
+				if(rs != null)
+					rs.close();
+				if(pstmt != null)
+					pstmt.close();
+				if(conn != null)
+					conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return lists;
+	}
+	
+	//오후 영화 조회
+	public ArrayList<Movies_Bean> pmSelectMovie() {
+		
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		// 레코드 입력된게 어제 날짜인 2026-10-21임
+		String sql = "select * from movies where movie_start between "
+				+ "to_date(to_char('2026-10-21')|| '12:00' , 'yyyy-mm-dd hh24:mi' )  and "
+				+ "to_date(to_char('2026-10-21')|| '23:59' , 'yyyy-mm-dd hh24:mi' ) ";
+		
+		ArrayList<Movies_Bean> lists = new ArrayList<Movies_Bean>();
+		
+		try {
+			conn = getConniction();
+			pstmt = conn.prepareStatement(sql);
+			
 			rs = pstmt.executeQuery();
 			
 			while(rs.next()) {
