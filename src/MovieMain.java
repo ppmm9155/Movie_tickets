@@ -96,10 +96,13 @@ public class MovieMain {
 				
 				break;
 			case 10:
+				//오전 영화 조회
 				amSelectMovie();
 				
 				break;
 			case 11:
+				//오후 영화 조회
+				pmSelectMovie();
 				
 				break;
 			case 12:
@@ -113,6 +116,17 @@ public class MovieMain {
 		}
 	}
 	
+	private void pmSelectMovie() {
+		ArrayList<Movies_Bean> pmlists = mdao.pmSelectMovie();
+		
+		if(pmlists.size()>0) {
+			showMovies(pmlists);
+		}else {
+			System.out.println("오후에 상영중인 영화가 없습니다.");
+		}
+		
+	}
+
 	private void amSelectMovie() {
 		ArrayList<Movies_Bean> amlists = mdao.amSelectMovie();
 		

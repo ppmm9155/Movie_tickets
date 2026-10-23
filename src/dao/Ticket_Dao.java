@@ -233,7 +233,7 @@ public class Ticket_Dao extends DBConnection{
 		
 		return lists;
 	}
-
+	//영화별 좌석수 조회
 	public ArrayList<Ticket_Bean> epmtySeats() {
 		Connection conn = null;
 		PreparedStatement pstmt = null;
