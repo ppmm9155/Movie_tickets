@@ -3,6 +3,7 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 
 import bean.Movies_Bean;
+import bean.Seat_Info_Bean;
 import bean.Ticket_Bean;
 import dao.Movies_Dao;
 import dao.Seat_Info_Dao;
@@ -18,6 +19,7 @@ public class MovieMain {
 		init();
 	}
 	
+	private int menu = 0;
 	// menu
 	private void init() {
 		while(true) {
@@ -41,7 +43,7 @@ public class MovieMain {
 			System.out.println("12. 프로그램 종료");
 			
 			
-			int menu = 0;
+			
 			
 			while(true) {
 				System.out.print("메뉴 선택 >> ");
@@ -67,7 +69,11 @@ public class MovieMain {
 				break;
 			case 3:
 				// 좌석표 조회
-				ArrayList<Ticket_Bean> Tlists =  findTicket();
+				ArrayList<Ticket_Bean> Tlists =  findTicket(menu);
+				if(Tlists == null) {
+					System.out.println("좌석표 조회가 취소 되었습니다 \n");
+					continue;
+				}
 				printSeat(Tlists);
 				
 				break;
@@ -76,6 +82,16 @@ public class MovieMain {
 				emptySeats();
 				break;
 			case 5:
+				//영화 예매
+				ArrayList<Ticket_Bean> NewTlists =  findTicket(menu);
+				if(NewTlists == null) {
+					System.out.println("좌석표 조회가 취소 되었습니다 \n");
+					continue;
+				}
+				
+
+				addTicket(NewTlists);
+				
 				
 				break;
 			case 6:
@@ -93,7 +109,7 @@ public class MovieMain {
 				
 				break;
 			case 9:
-				
+				//많이 예매한 영화조회
 				break;
 			case 10:
 				//오전 영화 조회
@@ -110,12 +126,116 @@ public class MovieMain {
 				System.exit(0);
 				break;
 			default:
-				System.out.println("1~13번만 입력하세요");
+				System.out.println("1~13번만 입력하세요 \n");
 			}
 			
 		}
 	}
 	
+	private ArrayList<Ticket_Bean> addTicket(ArrayList<Ticket_Bean> newTlists) {
+		//영화예매 를 최종적으로 다하면 -> 그 다한 예매정보(상태)를 가지고 -> insert 한다
+		//그전까지는 insert 일절안함
+		
+		
+//		보통 영화 좌석표 조회나 , 영화 예매를 할때
+//		남은좌석도 보여주잖아
+//		전체 좌석표 조회가 아닌 -> 남은좌석표도 조회가 가능하게 
+//		-> emptySeats(); 써서 해결함
+		while(true) {
+			//좌석출력
+			printSeat(newTlists);
+			
+			String row = null;
+			int col = 0;
+			System.out.println("뒤로 가기 하려면 n을 입력하세요");
+			System.out.println("메뉴로 가려면 N을 입력하세요");
+			System.out.println("");
+			System.out.print("예매할 좌석(행 열) 을 입력하세요 ");
+//			첫번째 입력에서 A B C D E 와 N 만되게 나머지 숫자,문자,특문 안되게
+			row=sc.next(); 
+			
+			if(row.equals("n")) { //뒤로가기
+				//뒤로가기 한후-> findTicket 에서 1 입력시 -> 좌석표로 안가고 menu로감
+				return findTicket(5);
+			}else if(row.equals("N")) { 
+				//메뉴이동 아예 취소
+				break;
+//				
+			}
+			
+//			숫자 이기때문에 InputMismatchException 예외처리가 발생함
+			while(true) {
+				try {
+//					
+					col=sc.nextInt();
+//					조건문으로 숫자 1,2,3,4,5만 입력되게함 나머지 숫자면 
+					break;
+				}catch(InputMismatchException e) {
+					System.out.println("(열) 입력은 숫자로만 입력하세요");
+					sc.next();
+				}
+			}
+			
+			
+			System.out.println("선택한 좌석번호: "+row+"행"+col+"열\n");
+//			Ticket_Bean tb = new Ticket_Bean();
+		
+//			insert 하는데 필요한 정보 movie_id , row 와 col 만으로 seat_id 조회하기
+			
+//			먼저 row와 col을 seat_id 로 조회
+			
+			int movie_id = 0;
+			int seat_id = 0;
+			for(Ticket_Bean x : newTlists) {
+				movie_id = x.getMb().getMovie_id();
+			}
+			
+			Seat_Info_Bean seatInfo= sdao.findSeat_id(row , col);
+			seat_id = seatInfo.getSeat_id();
+			// insert에 필요한 정보 출력 movie_id , seat_id
+			System.out.println("movie_id: "+movie_id);
+			System.out.println("seat_id: "+seat_id);
+			// 미리 좌석표 띄어둘 예매정보 추가
+			int cnt = tdao.insertTicket(movie_id,seat_id);
+			
+			if(cnt ==1) {
+//				추가가 되면 좌석표띄우고
+				
+//				좌석표 띄울때 예매정보 추가된것도 포함 안나오고 띄우는문제가 생김 
+//				commit 문제인거같은데 모르겟네
+//				▣
+				printSeat(newTlists);
+			}else {
+//				추가를 못하면 좌석표 안띄우고
+				System.out.println("좌석표를 불러오는데 오류가 생겼습니다");
+				break;
+			}
+			
+//			삭제는?
+			
+			
+//			tdao.insertTicket();
+			
+//			--> 선택한 좌석번호(아직 예매아님) 좌석표 띄움
+//			근데 좌석표를 띄우려면 예매정보가 필요함 
+//			미리 예매 정보 insert 시키고 띄우고 
+//			예매 취소 N 이나 뒤로가기n 누르면 예매 정보 delete 로 함
+//			->다시 뒤로가기후 -> 좌석표 띄우고 예매할 좌석을 정하고
+//			
+//			예매하시겠습니까? 에서 N 이면 취소 아예 메뉴로
+			
+			
+			
+//			최종적으로 좌석표를 확정하면 -> insert 예매한거 냅둠
+			
+			
+			break;
+		}
+		return newTlists;
+		
+		
+	}
+
 	private void pmSelectMovie() {
 		ArrayList<Movies_Bean> pmlists = mdao.pmSelectMovie();
 		
@@ -177,7 +297,7 @@ public class MovieMain {
 					x.getMb().getTitle() + (x.getMb().getTitle().equals("치이카와 인어섬") ? "\t" : "\t\t") +
 					x.getMb().getMovie_start().toLocalDateTime().format(timeFormatter) + "\t "+
 					x.getMb().getMovie_time()+"분"+"\t"+
-					(25-x.getSb().getSeat_id())+"/25");
+					(25-x.getSb().getSeat_id())+"/"+25);
 		}
 		System.out.println("-------------------------------------------------------");
 		
@@ -202,25 +322,74 @@ public class MovieMain {
 		}
 	}
 
-	private ArrayList<Ticket_Bean> findTicket() {
-		movieSelectAll(); // 먼저 전체조회 보여주고
+	private ArrayList<Ticket_Bean> findTicket(int menu) {
+		emptySeats(); // 먼저 남은좌석수도 있는 전체 조회 보여주고
+		// 예매가능한 영화번호만 입력되게  예매가능한 1~3만 영화번호 입력되게 그걸
+		//예매가능한것을 조회해야해 영화번호를 영화번호 첫값과 끝값 이렇게 조회
+		// N을 입력하면 취소가능하게
+		//
 		
-		int choiceMovie = 0 ;
+		// int라서 에초에 문자가들어오면 예외처리로감
+		// String 으로해서 N이면 빠져나오고 N이아닌 (N이 아닌 다른문자를 넣으면?)
+		//숫자면 영화관 번호에 포함되는지 보고 아니면 영화관 번호에 없는 번호
+//		있으면 영화관번호 니까 String을 int로 바꾼후에 tdao.findTicket 에 넣자
 		
+		String strMovieNum = null ;
+		
+//		int choiceMovie = Integer.parseInt(strMovieNum); 
+		int choiceMovie = 0;
 		while(true) {
-			System.out.print("좌석표 조회할 영화를(번호) 선택하세요 ");
-			try {
-				choiceMovie = sc.nextInt();
-				break;
-			}catch(InputMismatchException e) {
-				System.out.println("영화 번호를 입력하세요");
-				sc.next();
+			// menu 3과 menu 5 의 안내문구다르게
+			if(menu ==3) {
+				System.out.println("조회를 취소할려면 N 을 입력하세요");
+				System.out.print("좌석표 조회할 영화(번호)를 선택하세요 ");
+			}else if(menu ==5) {
+				System.out.println("조회를 취소할려면 N 을 입력하세요");
+				System.out.print("예매할 영화(번호)를 선택하세요 ");
 			}
+			
+//			NullPointerException
+			strMovieNum=sc.next();
+			if(strMovieNum.equals("N")) {
+				// 따지고보면 case를 빠져나가서 menu로 가는건데
+				//N 입력시 아예 메뉴선택창으로 가게 어떻게 해야하지?
+				return null;
+				
+				// 입력한 데이터가 숫자인지 아니면 문자인지 문자열에서 판별해야함
+			}else if(strMovieNum.matches("-?\\d+")) {
+				choiceMovie = Integer.parseInt(strMovieNum); 
+				// 입력한 번호가 영화번호에 포함되는지 , 구분
+				
+				boolean flag = mdao.isMovieId(choiceMovie); // 반환값을 boolean
+				
+//				구분후에 맞으면 break , 아니면 
+				if(flag) {
+					break;
+				}else {
+					System.out.println("입력한 번호가 영화번호에 없습니다\n");
+				}
+				
+				
+				
+			}else {
+				System.out.println("잘못된 입력입니다 숫자 또는 N 만 입력하세요 \n");
+			}
+
+
+			
+			// 입력한 번호가 영화번호가 있는지 Movie 테이블의 sql문으로 확인후  
 		}
 		
 		
-//		영화 번호와 맞는 해당 티켓 찾기
-		ArrayList<Ticket_Bean> Tlists = tdao.findTicket(choiceMovie);
+		
+		ArrayList<Ticket_Bean> Tlists = null;
+		// 문자열나올시 NumberFormatException 이 발생함
+		Tlists = tdao.findTicket(choiceMovie);
+		
+
+		
+		
+//		return null;
 		return Tlists;
 		
 	}

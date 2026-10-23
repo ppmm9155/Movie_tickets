@@ -218,6 +218,49 @@ public class Movies_Dao extends DBConnection{
 		return lists;
 	}
 	
+	// 입력한 번호가 영화번호에 있는지 
+	public Boolean isMovieId(int choiceMovie) {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		String sql = "select * from movies where movie_id = ? ";
+		
+		boolean flag = false;
+		
+		try {
+			conn = getConniction();
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, choiceMovie);
+			
+			rs = pstmt.executeQuery();
+			
+			
+			if(rs.next()) {
+				flag= true;
+			}else {
+				flag = false;
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}finally {
+			try {
+				if(rs != null)
+					rs.close();
+				if(pstmt != null)
+					pstmt.close();
+				if(conn != null)
+					conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return flag;
+		
+	}
+	
 //	
 	
 }

@@ -62,6 +62,39 @@ public class Seat_Info_Dao extends DBConnection{
 		return lists;
 		
 	}
+	// 입력한 row 와 col 이 seat_info에 있는지 그리고 seat_id 찾기
+	public Seat_Info_Bean findSeat_id(String row, int col) {
+		
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		String sql = "select seat_id from seat_info "
+				+ "where seat_row = ? and seat_col = ? ";
+		
+		Seat_Info_Bean sb = null;
+		
+		try {
+			conn = getConniction();
+			pstmt=conn.prepareStatement(sql);
+			
+			pstmt.setString(1, row);
+			pstmt.setInt(2, col);
+			
+			rs = pstmt.executeQuery();
+			
+			if(rs.next()) {
+				sb = new Seat_Info_Bean();
+				sb.setSeat_id(rs.getInt("seat_id"));
+				
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		return sb;
+	}
 	
 	
 }

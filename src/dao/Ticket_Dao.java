@@ -182,7 +182,11 @@ public class Ticket_Dao extends DBConnection{
 		Ticket_Bean tb;
 		
 		try {
+			
 			conn=getConniction();
+			
+			conn.setAutoCommit(false);
+			
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, choiceMovie);
 			
@@ -214,6 +218,8 @@ public class Ticket_Dao extends DBConnection{
 				tb.setSb(sb);
 				
 				lists.add(tb);
+				
+				conn.commit();
 			}
 			
 		} catch (SQLException e) {
@@ -326,6 +332,45 @@ public class Ticket_Dao extends DBConnection{
 		}
 		
 		return cnt;
+	}
+
+	public int insertTicket(int movie_id, int seat_id) {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		
+//		insert into ticket values(ticket_seq.nextval , 3 , 13 , default ); 
+		String sql = "insert into ticket values(ticket_seq.nextval , "
+				+ "? , ? , default) ";
+		
+		int cnt = 0;
+		
+		try {
+			conn=getConniction();
+			
+			conn.setAutoCommit(false);
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, movie_id);
+			pstmt.setInt(2, seat_id);
+			
+			cnt = pstmt.executeUpdate();
+			// 미리 자석에 띄울 에매정보 추가하고 commit 시킴
+			conn.commit();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}finally {
+			try {
+				if(pstmt != null)
+					pstmt.close();
+				if(conn != null)
+					conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return cnt;
+		
 	}
 
 }
