@@ -115,6 +115,7 @@ public class MovieMain {
 				break;
 			case 9:
 				//많이 예매한 영화조회
+				movieTicketCount();
 				
 				break;
 			case 10:
@@ -138,6 +139,33 @@ public class MovieMain {
 		}
 	}
 	
+	private void movieTicketCount() {
+		ArrayList<Movies_Bean> lists = mdao.movieTicketCount();
+
+	    if (lists == null) {
+	        System.out.println("예매건수를 조회하지 못했습니다 \n");
+	        return;
+	    }
+
+	    if (lists.isEmpty()) {
+	        System.out.println("등록된 영화가 없습니다 \n");
+	        return;
+	    }
+	    
+	    System.out.println("-----------------------------------------------");
+	    System.out.println("영화번호\t영화제목\t\t예매건수");
+
+	    for (Movies_Bean x : lists) {
+	        System.out.println(
+	                x.getMovie_id() + "\t" +
+	                x.getTitle() + (x.getTitle().equals("치이카와 인어섬") ? "\t" : "\t\t") + 
+	                + x.getTicket_count() + "건"
+	        );
+	    }
+
+	    System.out.println("-----------------------------------------------");
+	}
+
 	private ArrayList<Ticket_Bean> addTicket(int selectedMovieId, ArrayList<Ticket_Bean> newTlists) {
 		//영화예매 를 최종적으로 다하면 -> 그 다한 예매정보(상태)를 가지고 -> insert 한다
 		//그전까지는 insert 일절안함
@@ -189,7 +217,7 @@ public class MovieMain {
 //					조건문으로 숫자 1,2,3,4,5만 입력되게함 나머지 숫자면 
 					break;
 				}catch(InputMismatchException e) {
-					System.out.println("(열) 입력은 숫자로만 입력하세요");
+					System.out.print("(열) 입력은 숫자로만 입력하세요 : ");
 					sc.next();
 				}
 			}
@@ -231,6 +259,22 @@ public class MovieMain {
 			    continue;
 			}
 			
+			// 기존 예매 목록을 복사
+			ArrayList<Ticket_Bean> previewTlists = new ArrayList<>(newTlists);
+
+			// 사용자가 선택한 좌석 정보
+			Seat_Info_Bean sb = new Seat_Info_Bean();
+			sb.setSeat_row(row);
+			sb.setSeat_col(col);
+
+			// 출력용 임시 티켓
+			Ticket_Bean tb = new Ticket_Bean();
+			tb.setSb(sb);
+
+			// 좌석표에 선택한 자리 추가
+			previewTlists.add(tb);
+
+			printSeat(previewTlists);
 			
 			// insert에 필요한 정보 출력 movie_id , seat_id
 //			System.out.println("테스트");
@@ -238,9 +282,9 @@ public class MovieMain {
 //			System.out.println("seat_id: "+seat_id+'\n');
 			
 			// 예매 확정 전에 선택한 영화와 좌석정보 출력
-			Movies_Bean movie = mdao.findMovie(selectedMovieId);
+			Movies_Bean mb = mdao.findMovie(selectedMovieId);
 
-			if (movie == null) {
+			if (mb == null) {
 			    System.out.println("영화 정보를 불러오지 못했습니다 \n");
 			    return null;
 			}
@@ -249,11 +293,11 @@ public class MovieMain {
 			        java.time.format.DateTimeFormatter.ofPattern("HH시mm분");
 
 			System.out.println("-----------------------------------------------");
-			System.out.println("영화 제목: " + movie.getTitle());
+			System.out.println("영화 제목: " + mb.getTitle());
 			System.out.println("상영 시작 시간: "
-			        + movie.getMovie_start().toLocalDateTime().format(formatter));
-			System.out.println("상영 시간: " + movie.getMovie_time() + "분");
-			System.out.println("상영관: " + movie.getScreen_id() + "관");
+			        + mb.getMovie_start().toLocalDateTime().format(formatter));
+			System.out.println("상영 시간: " + mb.getMovie_time() + "분");
+			System.out.println("상영관: " + mb.getScreen_id() + "관");
 			System.out.println("관람 인원: 1");
 			System.out.println("선택 좌석: " + row + "행 " + col + "열");
 			System.out.println("-----------------------------------------------");
@@ -629,6 +673,7 @@ public class MovieMain {
 
 	private void searchMovie() {
 		System.out.print("영화 검색: ");
+		sc.nextLine();
 		String search = sc.nextLine();
 		
 		ArrayList<Movies_Bean> Searchlists = mdao.searchMovie(search);
