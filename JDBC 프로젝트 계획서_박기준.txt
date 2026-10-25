@@ -57,7 +57,7 @@ primary key 하나의 테이블에 중복해서 사용못함
 어려우면 하지않기
 
 ------------------------------------------------
-
+memo 한것
 		map k 중복허용안함 , v 중복허용함
 		
 		예매정보는 영화정보와좌석정보를 참조한다
@@ -119,14 +119,15 @@ primary key 하나의 테이블에 중복해서 사용못함
 
 예매한 티켓 하나 조회 (티켓ID)
 
-현재 상영하는 영화 조회 (현재 시간 기준으로?)
+현재 상영하는 영화 조회 (현재 시간 기준으로?) -> 기능에 안넣음
 
-많이 예매한 영화 조회(인기있는?)
+많이 예매한 영화 조회(인기있는?) -> 많이 예매한 영화 기준으로 조회 
 
 오전 영화 조회 
 
 오후 영화 조회
 
+--
 
 ----------
 --테이블
@@ -210,6 +211,7 @@ to_date(to_char(sysdate , 'yyyy-mm-dd')|| '15:00' , 'yyyy-mm-dd hh24:mi' ) , 150
 insert into movies values(movie_seq.nextval , 1 , '암살자들' , 
 to_date(to_char(sysdate , 'yyyy-mm-dd')|| '20:15' , 'yyyy-mm-dd hh24:mi' ) , 130);
 
+commit;
 -----좌석 정보 데이터 입력-------------------------
 
 insert into seat_info values(seat_seq.nextval , 1 , 'A' , 1 );
@@ -273,7 +275,6 @@ join movies m on k.movie_id = m.movie_id
 join seat_info s on k.seat_id = s.seat_id ; 
 
 --남은 좌석수 계산용
-
 select 
 m.movie_id , m.screen_id, m.title ,m.movie_start , m.movie_time , count(s.seat_id) as count 
 from ticket k
@@ -281,14 +282,14 @@ join movies m on k.movie_id = m.movie_id
 join seat_info s on k.seat_id = s.seat_id 
 group by m.movie_id,m.screen_id,m.title,m.movie_start,m.movie_time;
 
--- 예매정보없으면 안나옴 , left join으로 변경
+-- 예매정보없으면 안나옴 , left join으로 변경함
 select m.movie_id, m.screen_id, m.title, m.movie_start, m.movie_time, count(k.ticket_id) as count
 from movies m
 left join ticket k on m.movie_id = k.movie_id
 group by m.movie_id, m.screen_id, m.title, m.movie_start, m.movie_time
 order by m.movie_id ;
 
---오전 영화 조건
+--오전 영화 조건 -> 날짜도 판별하기에 시간만 확인하도록함
 select * from movies where movie_start between 
 to_date(to_char('2026-10-21')|| '00:00' , 'yyyy-mm-dd hh24:mi' )  and 
 to_date(to_char('2026-10-21')|| '12:00' , 'yyyy-mm-dd hh24:mi' ) ; 
