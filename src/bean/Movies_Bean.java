@@ -8,6 +8,7 @@ public class Movies_Bean {
 	private String title;
 	private Timestamp movie_start;
 	private int movie_time;
+	private int ticket_count;
 	
 	//getter setter
 	public int getMovie_id() {
@@ -39,6 +40,12 @@ public class Movies_Bean {
 	}
 	public void setMovie_time(int movie_time) {
 		this.movie_time = movie_time;
+	}
+	public int getTicket_count() {
+		return ticket_count;
+	}
+	public void setTicket_count(int ticket_count) {
+		this.ticket_count = ticket_count;
 	}
 	
 	

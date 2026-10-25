@@ -306,6 +306,59 @@ public class Movies_Dao extends DBConnection{
 	    }
 
 	    return mb;
+	}//
+	
+	
+	// 전체 영화를 예매 건수가 많은 순서로 조회
+	public ArrayList<Movies_Bean> movieTicketCount() {
+	    Connection conn = null;
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
+
+	    String sql = "select "
+	            + "m.movie_id, m.title, count(k.ticket_id) as ticket_count "
+	            + "from movies m "
+	            + "left join ticket k on m.movie_id = k.movie_id "
+	            + "group by m.movie_id, m.title "
+	            + "order by ticket_count desc, m.movie_id asc";
+
+	    ArrayList<Movies_Bean> lists = new ArrayList<Movies_Bean>();
+
+	    try {
+	        conn = getConniction();
+	        pstmt = conn.prepareStatement(sql);
+	        rs = pstmt.executeQuery();
+
+	        while (rs.next()) {
+	            Movies_Bean mb = new Movies_Bean();
+
+	            mb.setMovie_id(rs.getInt("movie_id"));
+	            mb.setTitle(rs.getString("title"));
+	            mb.setTicket_count(rs.getInt("ticket_count"));
+	
+	            lists.add(mb);
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+
+	        // 조회 실패와 영화가 없는 상태를 구분
+	        return null;
+
+	    } finally {
+	        try {
+	            if (rs != null)
+	                rs.close();
+	            if (pstmt != null)
+	                pstmt.close();
+	            if (conn != null)
+	                conn.close();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
+
+	    return lists;
 	}
 	
 	
