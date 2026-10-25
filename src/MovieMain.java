@@ -1,3 +1,4 @@
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -19,7 +20,11 @@ public class MovieMain {
 		init();
 	}
 	
+	//필드
 	private int menu = 0;
+//	선택한 영화번호 저장
+	private int selectedMovieId = 0;
+	
 	// menu
 	private void init() {
 		while(true) {
@@ -85,12 +90,12 @@ public class MovieMain {
 				//영화 예매
 				ArrayList<Ticket_Bean> NewTlists =  findTicket(menu);
 				if(NewTlists == null) {
-					System.out.println("좌석표 조회가 취소 되었습니다 \n");
+					System.out.println("예매 좌석 조회가 취소 되었습니다 \n");
 					continue;
 				}
 				
 
-				addTicket(NewTlists);
+				addTicket(selectedMovieId, NewTlists);
 				
 				
 				break;
@@ -110,6 +115,7 @@ public class MovieMain {
 				break;
 			case 9:
 				//많이 예매한 영화조회
+				
 				break;
 			case 10:
 				//오전 영화 조회
@@ -126,13 +132,13 @@ public class MovieMain {
 				System.exit(0);
 				break;
 			default:
-				System.out.println("1~13번만 입력하세요 \n");
+				System.out.println("1~12번만 입력하세요 \n");
 			}
 			
 		}
 	}
 	
-	private ArrayList<Ticket_Bean> addTicket(ArrayList<Ticket_Bean> newTlists) {
+	private ArrayList<Ticket_Bean> addTicket(int selectedMovieId, ArrayList<Ticket_Bean> newTlists) {
 		//영화예매 를 최종적으로 다하면 -> 그 다한 예매정보(상태)를 가지고 -> insert 한다
 		//그전까지는 insert 일절안함
 		
@@ -154,13 +160,25 @@ public class MovieMain {
 //			첫번째 입력에서 A B C D E 와 N 만되게 나머지 숫자,문자,특문 안되게
 			row=sc.next(); 
 			
-			if(row.equals("n")) { //뒤로가기
-				//뒤로가기 한후-> findTicket 에서 1 입력시 -> 좌석표로 안가고 menu로감
-				return findTicket(5);
-			}else if(row.equals("N")) { 
-				//메뉴이동 아예 취소
-				break;
-//				
+//			기존 뒤로 가기 후 영화를 다시 선택하면 메뉴로 돌아가는 문제 ->
+//			AI는 이렇게 추천함
+			if (row.equals("n")) {
+			    // 영화를 다시 선택하고 해당 영화의 예매 목록을 조회
+			    newTlists = findTicket(5);
+
+			    // 영화 선택을 취소하면 예매 메서드 종료
+			    if (newTlists == null) {
+			        return null;
+			    }
+
+			    // 재선택한 영화 번호를 필드에서 가져와 매개변수에 반영
+			    selectedMovieId = this.selectedMovieId;
+
+			    // 반복문 처음으로 돌아가 새 영화의 좌석표 출력
+			    continue;
+
+			} else if (row.equals("N")) {
+			    break;
 			}
 			
 //			숫자 이기때문에 InputMismatchException 예외처리가 발생함
@@ -184,31 +202,119 @@ public class MovieMain {
 			
 //			먼저 row와 col을 seat_id 로 조회
 			
-			int movie_id = 0;
 			int seat_id = 0;
-			for(Ticket_Bean x : newTlists) {
-				movie_id = x.getMb().getMovie_id();
-			}
+			//movie_id 없애고 movie_id를 필드에있는걸 가져오는걸로 
+//			int movie_id = 0;
 			
 			Seat_Info_Bean seatInfo= sdao.findSeat_id(row , col);
-			seat_id = seatInfo.getSeat_id();
-			// insert에 필요한 정보 출력 movie_id , seat_id
-			System.out.println("movie_id: "+movie_id);
-			System.out.println("seat_id: "+seat_id);
-			// 미리 좌석표 띄어둘 예매정보 추가
-			int cnt = tdao.insertTicket(movie_id,seat_id);
 			
-			if(cnt ==1) {
-//				추가가 되면 좌석표띄우고
-				
-//				좌석표 띄울때 예매정보 추가된것도 포함 안나오고 띄우는문제가 생김 
-//				commit 문제인거같은데 모르겟네
-//				▣
-				printSeat(newTlists);
-			}else {
-//				추가를 못하면 좌석표 안띄우고
-				System.out.println("좌석표를 불러오는데 오류가 생겼습니다");
-				break;
+			if (seatInfo == null) {
+			    System.out.println("좌석 정보를 찾을수 없습니다");
+			    continue;
+			}
+			
+			seat_id = seatInfo.getSeat_id();
+			
+			//
+			Boolean flag = tdao.isReserved(selectedMovieId, seat_id);
+			
+			//조회 실패 시 예매를 하지않음
+			if (flag == null) {
+			    System.out.println("좌석 예매 여부를 확인하지 못했습니다\n");
+			    return null;
+			}
+
+			//이미 예매된 좌석이면 -> 좌석표를 갱신하고 다시 입력
+			if (flag) {
+			    System.out.println("이미 예매된 좌석입니다 다시 선택하세요\n");
+			    newTlists = tdao.findTicket(selectedMovieId);
+			    continue;
+			}
+			
+			
+			// insert에 필요한 정보 출력 movie_id , seat_id
+//			System.out.println("테스트");
+//			System.out.println("movie_id: "+selectedMovieId);
+//			System.out.println("seat_id: "+seat_id+'\n');
+			
+			// 예매 확정 전에 선택한 영화와 좌석정보 출력
+			Movies_Bean movie = mdao.findMovie(selectedMovieId);
+
+			if (movie == null) {
+			    System.out.println("영화 정보를 불러오지 못했습니다 \n");
+			    return null;
+			}
+
+			java.time.format.DateTimeFormatter formatter =
+			        java.time.format.DateTimeFormatter.ofPattern("HH시mm분");
+
+			System.out.println("-----------------------------------------------");
+			System.out.println("영화 제목: " + movie.getTitle());
+			System.out.println("상영 시작 시간: "
+			        + movie.getMovie_start().toLocalDateTime().format(formatter));
+			System.out.println("상영 시간: " + movie.getMovie_time() + "분");
+			System.out.println("상영관: " + movie.getScreen_id() + "관");
+			System.out.println("관람 인원: 1");
+			System.out.println("선택 좌석: " + row + "행 " + col + "열");
+			System.out.println("-----------------------------------------------");
+			
+			
+			// 최종 예매 확인
+			while (true) {
+			    System.out.print(row + "행 " + col + "열을 예매하시겠습니까? (Y/N): ");
+			    String answer = sc.next();
+
+			    if (answer.equalsIgnoreCase("Y")) {
+			        break;
+			    } else if (answer.equalsIgnoreCase("N")) {
+			        System.out.println("예매를 취소했습니다 \n");
+			        return null;
+			    } else {
+			        System.out.println("Y 또는 N을 입력하세요.");
+			    }
+			}
+			
+			// 미리 좌석표 띄어둘 예매정보 추가 , 최종예매 여부 확인후 insert 함
+			int cnt = tdao.insertTicket(selectedMovieId,seat_id);
+			
+			
+			
+//			if(cnt ==1) {
+////				추가가 되면 좌석표띄우고
+//				
+////				좌석표 띄울때 예매정보 추가된것도 포함 안나오고 띄우는문제가 생김 
+////				commit 문제인거같은데 모르겟네
+////				▣
+//				
+//				// 예매 성공 하면 해당 영화의 예매 목록을 다시 조회
+//				newTlists = tdao.findTicket(selectedMovieId);
+//				// 새로 예매된 좌석까지 반영해서 출력
+//			    printSeat(newTlists);
+//			}else {
+////				추가를 못하면 좌석표 안띄우고
+//				System.out.println("예매에 실패 했습니다");
+//				break;
+//			}
+			
+			if (cnt == 1) {
+			    // 저장된 예매 정보로 갱신
+			    newTlists = tdao.findTicket(selectedMovieId);
+			    
+			    System.out.println("예매가 완료되었습니다");
+
+			    // 선택한 영화의 예매 목록에서 해당 좌석의 예매 번호 출력
+			    for (Ticket_Bean ticket : newTlists) {
+			        if (ticket.getSb().getSeat_row().equals(row)
+			                && ticket.getSb().getSeat_col() == col) {
+
+			            System.out.println("예매 번호: " + ticket.getTicket_id()+"\n");
+			            break;
+			        }
+			    }
+			    
+			} else {
+			    System.out.println("예매에 실패했습니다.");
+			    break;
 			}
 			
 //			삭제는?
@@ -258,6 +364,17 @@ public class MovieMain {
 	}
 
 	private void deleteTicket() {
+		// 예매 정보가 없으면 메뉴로 돌아감
+		try {
+		    if (!tdao.haveTicket()) {
+		        System.out.println("예매한 티켓이 없습니다\n");
+		        return;
+		    }
+		} catch (SQLException e) {
+		    System.out.println("예매 정보를 확인하는 중 오류가 발생했습니다\n");
+		    e.printStackTrace();
+		    return;
+		}
 		
 		int delete = 0;
 		while(true) {
@@ -274,9 +391,9 @@ public class MovieMain {
 		int cnt = tdao.deleteTicket(delete);
 		
 		if(cnt == 1) {
-			System.out.println("예매 취소 했습니다.");
+			System.out.println("예매 취소 했습니다 \n");
 		}else {
-			System.out.println("에매 취소를 실패했습니다.");
+			System.out.println("에매 취소를 실패했습니다 \n");
 		}
 	}
 
@@ -308,7 +425,7 @@ public class MovieMain {
 		if(Tlists.size() > 0 ) {
 			showTicket(Tlists);
 		}else {
-			System.out.println("예매 정보가 없습니다");
+			System.out.println("예매한 티켓 정보가 없습니다\n");
 		}
 		
 	}
@@ -364,6 +481,8 @@ public class MovieMain {
 				
 //				구분후에 맞으면 break , 아니면 
 				if(flag) {
+//					입력한 영화 번호가 있으면 선택한 번호로
+					selectedMovieId = choiceMovie;
 					break;
 				}else {
 					System.out.println("입력한 번호가 영화번호에 없습니다\n");
@@ -445,6 +564,17 @@ public class MovieMain {
 	
 	private void searchTicket() {
 		java.time.format.DateTimeFormatter timeFormatter = java.time.format.DateTimeFormatter.ofPattern("HH시mm분");
+		// 예매 정보가 없으면 메뉴로 돌아감
+		try {
+		    if (!tdao.haveTicket()) {
+		        System.out.println("예매한 티켓이 없습니다\n");
+		        return;
+		    }
+		} catch (SQLException e) {
+		    System.out.println("예매 정보를 확인하는 중 오류가 발생했습니다\n");
+		    e.printStackTrace();
+		    return;
+		}
 		
 		int ticketId = 0;
 		
@@ -499,7 +629,7 @@ public class MovieMain {
 
 	private void searchMovie() {
 		System.out.print("영화 검색: ");
-		String search = sc.next();
+		String search = sc.nextLine();
 		
 		ArrayList<Movies_Bean> Searchlists = mdao.searchMovie(search);
 		

@@ -24,7 +24,7 @@ public class Seat_Info_Dao extends DBConnection{
 		
 		ArrayList<Seat_Info_Bean> lists = new ArrayList<Seat_Info_Bean>();
 		
-		String sql = "select 8 from seat_info order by seat_id asc";
+		String sql = "select * from seat_info order by seat_id asc";
 		try {
 			conn = getConniction();
 			pstmt = conn.prepareStatement(sql);
@@ -91,6 +91,18 @@ public class Seat_Info_Dao extends DBConnection{
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}finally {
+			try {
+				if(rs!= null)
+					rs.close();
+				if(pstmt!= null)
+					pstmt.close();
+				if(conn != null) {
+					conn.close();
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 		}
 		
 		return sb;

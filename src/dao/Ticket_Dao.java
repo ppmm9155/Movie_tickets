@@ -244,12 +244,13 @@ public class Ticket_Dao extends DBConnection{
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
+		//에몌정보만 있는거 조회하는거 에서 -> 예매정보도 없는 영화도 조회하게 
 		String sql = "select "
-				+ "m.movie_id , m.screen_id, m.title ,m.movie_start , m.movie_time , count(s.seat_id) as count "
-				+ "from ticket k "
-				+ "join movies m on k.movie_id = m.movie_id "
-				+ "join seat_info s on k.seat_id = s.seat_id "
-				+ "group by m.movie_id,m.screen_id,m.title,m.movie_start,m.movie_time ";
+		        + "m.movie_id , m.screen_id, m.title ,m.movie_start , m.movie_time , count(k.ticket_id) as count "
+		        + "from movies m "
+		        + "left join ticket k on k.movie_id = m.movie_id "
+		        + "group by m.movie_id,m.screen_id,m.title,m.movie_start,m.movie_time "
+		        + "order by m.movie_id ";
 		
 		ArrayList<Ticket_Bean> lists = new ArrayList<Ticket_Bean>();
 		Ticket_Bean tb;
@@ -354,10 +355,23 @@ public class Ticket_Dao extends DBConnection{
 			
 			cnt = pstmt.executeUpdate();
 			// 미리 자석에 띄울 에매정보 추가하고 commit 시킴
+			//commit 확정되면 cnt 1 로 반환되게
 			conn.commit();
+			
+			return cnt;
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
+			
+			// insert 또는 commit 실패 시 변경사항 취소
+			if (conn != null) {
+		        try {
+		            conn.rollback();
+		        } catch (SQLException rollbackError) {
+		            rollbackError.printStackTrace();
+		        }
+		    }
+			
 		}finally {
 			try {
 				if(pstmt != null)
@@ -368,9 +382,87 @@ public class Ticket_Dao extends DBConnection{
 				e.printStackTrace();
 			}
 		}
+		//저장성공 못하면 0으로 
+		return 0;
 		
-		return cnt;
+	}
+	
+	public boolean haveTicket() throws SQLException{
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+	    ResultSet rs = null;
+	    
+	    String sql = "select ticket_id from ticket where rownum = 1";
+	    
+	    boolean flag = false;
+	    
+	    try {
+	        conn = getConniction();
+	        pstmt = conn.prepareStatement(sql);
+	        rs = pstmt.executeQuery();
+
+	        // flag 있으면 true 없으면 false
+	        flag = rs.next();
+	        return flag;
+
+	    }finally {
+	        try {
+	            if (rs != null)
+	                rs.close();
+	            if (pstmt != null)
+	                pstmt.close();
+	            if (conn != null)
+	                conn.close();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
+	    
+	}
+	
+	// 해당 영화의 해당 좌석이 이미 예매됐는지 확인
+	// 해당 영화의 좌석 예매 여부 확인
+	public Boolean isReserved(int movieId, int seatId) {
 		
+	    Connection conn = null;
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
+
+	    String sql = "select ticket_id from ticket "
+	            + "where movie_id = ? and seat_id = ?";
+	    
+	    boolean flag = false;
+	    
+	    try {
+	        conn = getConniction();
+	        pstmt = conn.prepareStatement(sql);
+
+	        pstmt.setInt(1, movieId);
+	        pstmt.setInt(2, seatId);
+
+	        rs = pstmt.executeQuery();
+	        
+	        flag = rs.next();
+	        
+	        return flag;
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        return null;
+
+	    } finally {
+	        try {
+	            if (rs != null)
+	                rs.close();
+	            if (pstmt != null)
+	                pstmt.close();
+	            if (conn != null)
+	                conn.close();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }//finally
+	    
 	}
 
 }

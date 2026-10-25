@@ -127,9 +127,10 @@ public class Movies_Dao extends DBConnection{
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		// 레코드 입력된게 어제 날짜인 2026-10-21임
-		String sql = "select * from movies where movie_start between "
-				+ "to_date(to_char('2026-10-21')|| '00:00' , 'yyyy-mm-dd hh24:mi' )  and "
-				+ "to_date(to_char('2026-10-21')|| '11:59' , 'yyyy-mm-dd hh24:mi' ) ";
+		// 날짜상관없이 시간만 구분해서 하는걸로 
+		String sql = "select * from movies "
+		        + "where to_char(movie_start, 'HH24') < '12' "
+		        + "order by movie_start";
 		
 		ArrayList<Movies_Bean> lists = new ArrayList<Movies_Bean>();
 		
@@ -176,9 +177,10 @@ public class Movies_Dao extends DBConnection{
 		ResultSet rs = null;
 		
 		// 레코드 입력된게 어제 날짜인 2026-10-21임
-		String sql = "select * from movies where movie_start between "
-				+ "to_date(to_char('2026-10-21')|| '12:00' , 'yyyy-mm-dd hh24:mi' )  and "
-				+ "to_date(to_char('2026-10-21')|| '23:59' , 'yyyy-mm-dd hh24:mi' ) ";
+		// 날짜상관없이 시간만 구분해서 하는걸로 
+		String sql = "select * from movies "
+		        + "where to_char(movie_start, 'HH24') >= '12' "
+		        + "order by movie_start";
 		
 		ArrayList<Movies_Bean> lists = new ArrayList<Movies_Bean>();
 		
@@ -260,6 +262,52 @@ public class Movies_Dao extends DBConnection{
 		return flag;
 		
 	}
+	
+	// 선택한 영화 번호로 영화 정보 조회
+	public Movies_Bean findMovie(int movieId) {
+	    Connection conn = null;
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
+
+	    String sql = "select * from movies where movie_id = ?";
+	    Movies_Bean mb = null;
+
+	    try {
+	        conn = getConniction();
+	        pstmt = conn.prepareStatement(sql);
+	        pstmt.setInt(1, movieId);
+
+	        rs = pstmt.executeQuery();
+
+	        if (rs.next()) {
+	            mb = new Movies_Bean();
+
+	            mb.setMovie_id(rs.getInt("movie_id"));
+	            mb.setScreen_id(rs.getInt("screen_id"));
+	            mb.setTitle(rs.getString("title"));
+	            mb.setMovie_start(rs.getTimestamp("movie_start"));
+	            mb.setMovie_time(rs.getInt("movie_time"));
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+
+	    } finally {
+	        try {
+	            if (rs != null)
+	                rs.close();
+	            if (pstmt != null)
+	                pstmt.close();
+	            if (conn != null)
+	                conn.close();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
+
+	    return mb;
+	}
+	
 	
 //	
 	
