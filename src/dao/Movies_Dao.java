@@ -1,0 +1,367 @@
+package dao;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+import bean.Movies_Bean;
+import config.DBConnection;
+
+public class Movies_Dao extends DBConnection{
+	
+	public Movies_Dao() {
+		super();
+	}
+	
+	//전체영화 조회
+	public ArrayList<Movies_Bean> movieSelectAll() {
+		
+		String sql = "select * from movies order by movie_id asc";
+		
+		Connection conn = null;
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
+	    
+	    ArrayList<Movies_Bean> lists = new ArrayList<Movies_Bean>();
+	    
+		try{
+			//접속
+			conn = getConniction();
+			
+	        pstmt = conn.prepareStatement(sql);
+	        
+	        rs = pstmt.executeQuery();
+	        
+	        while (rs.next()) {
+	        	
+	        	Movies_Bean mb = new Movies_Bean();
+	        	
+	        	mb.setMovie_id(rs.getInt("movie_id"));
+	        	mb.setScreen_id(rs.getInt("screen_id"));
+	        	mb.setTitle(rs.getString("title"));
+	        	mb.setMovie_start(rs.getTimestamp("movie_start"));
+	        	mb.setMovie_time(rs.getInt("movie_time"));
+	        	
+	        	lists.add(mb);
+	        }
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}finally {
+			try {
+				if(rs != null)
+					rs.close();
+				if(pstmt != null)
+					pstmt.close();
+				if(conn != null)
+					conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}//finally
+		
+		return lists;
+		
+	}
+	
+	//영화 상세 정보 조회
+	public ArrayList<Movies_Bean> searchMovie(String search) {
+		
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		ArrayList<Movies_Bean> lists = new ArrayList<Movies_Bean>();
+		
+		try {
+			conn = getConniction();
+			
+			String sql = "select * from movies where title like ? ";
+			
+			pstmt= conn.prepareStatement(sql);
+			
+			pstmt.setString(1, "%"+search+"%");
+			
+//			pstmt.setString(1, search);
+			
+			rs = pstmt.executeQuery();
+			
+			while(rs.next()) {
+				
+				Movies_Bean mb = new Movies_Bean();
+	        	
+	        	mb.setMovie_id(rs.getInt("movie_id"));
+	        	mb.setScreen_id(rs.getInt("screen_id"));
+	        	mb.setTitle(rs.getString("title"));
+	        	mb.setMovie_start(rs.getTimestamp("movie_start"));
+	        	mb.setMovie_time(rs.getInt("movie_time"));
+	        	
+	        	lists.add(mb);
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}finally {
+			try {
+				if(rs != null)
+					rs.close();
+				if(pstmt != null)
+					pstmt.close();
+				if(conn != null)
+					conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}//finally
+		
+		return lists;
+		
+	}
+	
+	//오전 영화 조회
+	public ArrayList<Movies_Bean> amSelectMovie() {
+		
+		Connection conn= null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		// 레코드 입력된게 어제 날짜인 2026-10-21임
+		// 날짜상관없이 시간만 구분해서 하는걸로 
+		String sql = "select * from movies "
+		        + "where to_char(movie_start, 'HH24') < '12' "
+		        + "order by movie_start";
+		
+		ArrayList<Movies_Bean> lists = new ArrayList<Movies_Bean>();
+		
+		try {
+			conn=getConniction();
+			pstmt = conn.prepareStatement(sql);
+			rs = pstmt.executeQuery();
+			
+			while(rs.next()) {
+				Movies_Bean mb = new Movies_Bean();
+	        	
+	        	mb.setMovie_id(rs.getInt("movie_id"));
+	        	mb.setScreen_id(rs.getInt("screen_id"));
+	        	mb.setTitle(rs.getString("title"));
+	        	mb.setMovie_start(rs.getTimestamp("movie_start"));
+	        	mb.setMovie_time(rs.getInt("movie_time"));
+	        	
+	        	lists.add(mb);
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}finally {
+			try {
+				if(rs != null)
+					rs.close();
+				if(pstmt != null)
+					pstmt.close();
+				if(conn != null)
+					conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return lists;
+	}
+	
+	//오후 영화 조회
+	public ArrayList<Movies_Bean> pmSelectMovie() {
+		
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		// 레코드 입력된게 어제 날짜인 2026-10-21임
+		// 날짜상관없이 시간만 구분해서 하는걸로 
+		String sql = "select * from movies "
+		        + "where to_char(movie_start, 'HH24') >= '12' "
+		        + "order by movie_start";
+		
+		ArrayList<Movies_Bean> lists = new ArrayList<Movies_Bean>();
+		
+		try {
+			conn = getConniction();
+			pstmt = conn.prepareStatement(sql);
+			
+			rs = pstmt.executeQuery();
+			
+			while(rs.next()) {
+				Movies_Bean mb = new Movies_Bean();
+	        	
+	        	mb.setMovie_id(rs.getInt("movie_id"));
+	        	mb.setScreen_id(rs.getInt("screen_id"));
+	        	mb.setTitle(rs.getString("title"));
+	        	mb.setMovie_start(rs.getTimestamp("movie_start"));
+	        	mb.setMovie_time(rs.getInt("movie_time"));
+	        	
+	        	lists.add(mb);
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}finally {
+			try {
+				if(rs != null)
+					rs.close();
+				if(pstmt != null)
+					pstmt.close();
+				if(conn != null)
+					conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return lists;
+	}
+	
+	// 입력한 번호가 영화번호에 있는지 
+	public Boolean isMovieId(int choiceMovie) {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		
+		String sql = "select * from movies where movie_id = ? ";
+		
+		boolean flag = false;
+		
+		try {
+			conn = getConniction();
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, choiceMovie);
+			
+			rs = pstmt.executeQuery();
+			
+			
+			if(rs.next()) {
+				flag= true;
+			}else {
+				flag = false;
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}finally {
+			try {
+				if(rs != null)
+					rs.close();
+				if(pstmt != null)
+					pstmt.close();
+				if(conn != null)
+					conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return flag;
+		
+	}
+	
+	// 선택한 영화 번호로 영화 정보 조회
+	public Movies_Bean findMovie(int movieId) {
+	    Connection conn = null;
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
+
+	    String sql = "select * from movies where movie_id = ?";
+	    Movies_Bean mb = null;
+
+	    try {
+	        conn = getConniction();
+	        pstmt = conn.prepareStatement(sql);
+	        pstmt.setInt(1, movieId);
+
+	        rs = pstmt.executeQuery();
+
+	        if (rs.next()) {
+	            mb = new Movies_Bean();
+
+	            mb.setMovie_id(rs.getInt("movie_id"));
+	            mb.setScreen_id(rs.getInt("screen_id"));
+	            mb.setTitle(rs.getString("title"));
+	            mb.setMovie_start(rs.getTimestamp("movie_start"));
+	            mb.setMovie_time(rs.getInt("movie_time"));
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+
+	    } finally {
+	        try {
+	            if (rs != null)
+	                rs.close();
+	            if (pstmt != null)
+	                pstmt.close();
+	            if (conn != null)
+	                conn.close();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
+
+	    return mb;
+	}//
+	
+	
+	// 전체 영화를 예매 건수가 많은 순서로 조회
+	public ArrayList<Movies_Bean> movieTicketCount() {
+	    Connection conn = null;
+	    PreparedStatement pstmt = null;
+	    ResultSet rs = null;
+
+	    String sql = "select "
+	            + "m.movie_id, m.title, count(k.ticket_id) as ticket_count "
+	            + "from movies m "
+	            + "left join ticket k on m.movie_id = k.movie_id "
+	            + "group by m.movie_id, m.title "
+	            + "order by ticket_count desc, m.movie_id asc";
+
+	    ArrayList<Movies_Bean> lists = new ArrayList<Movies_Bean>();
+
+	    try {
+	        conn = getConniction();
+	        pstmt = conn.prepareStatement(sql);
+	        rs = pstmt.executeQuery();
+
+	        while (rs.next()) {
+	            Movies_Bean mb = new Movies_Bean();
+
+	            mb.setMovie_id(rs.getInt("movie_id"));
+	            mb.setTitle(rs.getString("title"));
+	            mb.setTicket_count(rs.getInt("ticket_count"));
+	
+	            lists.add(mb);
+	        }
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+
+	        // 조회 실패와 영화가 없는 상태를 구분
+	        return null;
+
+	    } finally {
+	        try {
+	            if (rs != null)
+	                rs.close();
+	            if (pstmt != null)
+	                pstmt.close();
+	            if (conn != null)
+	                conn.close();
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	    }
+
+	    return lists;
+	}
+	
+	
+//	
+	
+}
